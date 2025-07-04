@@ -1,6 +1,6 @@
-<?php 
-require_once ('auth.php');
-requireStatus();
+<?php
+require_once('auth.php');
+// requireStatus();
 
 
 
@@ -237,6 +237,13 @@ requireStatus();
 
 
         }
+         .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -287,30 +294,44 @@ requireStatus();
             </div>
             <br>
 
-            <button type="submit" id="std-submit">Login</button><button type="reset" id="cancel-btn">Cancel</button>
-            <br>
-            <label for="remb-chkbox"><span style="font-size">Remember me</span></label>
-            <input type="checkbox" id="remb-chkbox">
-            <br>
-            <div class="alink"><a href="signup.php">New User?</a>
-                <a href="#" style="margin-left: 38%;">Forgot password</a>
-            </div>
+            <button type="submit" id="std-submit">Login</a><button type="reset"
+                    id="cancel-btn">Cancel</button>
+                <br>
+                <label for="remb-chkbox"><span style="font-size">Remember me</span></label>
+                <input type="checkbox" id="remb-chkbox">
+                <br>
+                <div class="alink"><a href="signup.php">New User?</a>
+                    <a href="#" style="margin-left: 38%;">Forgot password</a>
+                </div>
 
-            <!-- ② JS helpers -->
-            <script>
-                document.getElementById('togglePwd').addEventListener('click', function () {
-                    const pwdField = document.getElementById('user-paswd');
-                    const typeNow = pwdField.getAttribute('type') === 'password' ? 'text' : 'password';
-                    pwdField.setAttribute('type', typeNow);
+                <!-- ② JS helpers -->
+                <script>
+                    document.getElementById('togglePwd').addEventListener('click', function () {
+                        const pwdField = document.getElementById('user-paswd');
+                        const typeNow = pwdField.getAttribute('type') === 'password' ? 'text' : 'password';
+                        pwdField.setAttribute('type', typeNow);
 
-                    /* swap icon */
-                    this.classList.toggle('fa-eye');
-                    this.classList.toggle('fa-eye-slash');
-                });
-            </script>
+                        /* swap icon */
+                        this.classList.toggle('fa-eye');
+                        this.classList.toggle('fa-eye-slash');
+                    });
+
+                </script>
+                <!-- <?php if (isset($wrgpaswd)) {
+                    echo '<script>
+                        alert("Password Incorrect Check Again!")  // centred OS dialog
+                    </script>';
+                }
+              
+            ?> -->
+                   
+
         </form>
     </div>
 
 </body>
-
+ <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; <?php echo date('Y'); ?> NITTTR. All rights reserved. | Unauthorized access is prohibited.</p>
+    </footer>
 </html>
