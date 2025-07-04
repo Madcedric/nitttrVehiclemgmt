@@ -17,7 +17,7 @@ if (!$conn) {
 
     die("Sever Not Connected" . mysqli_connect_error());
 } else {
-    echo "db connected";
+    // echo "db connected";
 }
 
 $action = $_POST['action'] ?? '';
@@ -75,11 +75,11 @@ function handleSignup()
     $stmt->execute();
     mysqli_stmt_bind_result($stmt, $foundsignupName, $foundsignupEmail);
 
-    if (mysqli_stmt_fetch($stmt)) {
-        echo $foundsignupName . ' ' . $foundsignupEmail;
-    } else {
-        echo "No user found with that email.";
-    }
+    // if (mysqli_stmt_fetch($stmt)) {
+    //     echo $foundsignupName . ' ' . $foundsignupEmail;
+    // } else {
+    //     alertFunc("No user found with that email ❌", 'signup.php');
+    // }
 
     $stmt->close();
 
@@ -88,12 +88,11 @@ function handleSignup()
 
 
     if (empty($upaswd) || empty($uname) || empty($uemail) || empty($uconfrimpaswd)) {
-        die('Invalid Input Check All The Values');
+        alertFunc("Invalid Input Check All The Values ❌", 'signup.php');
     } elseif (paswd_verify($upaswd, $uconfrimpaswd, 'signup')) {
         if ($foundsignupName === $uname || $uemail === $foundsignupEmail) {
-            die('Username or Email Already Exist');
+            alertFunc('Username or Email Already Exist ❌', 'signup.php');
         } else {
-
             //! table changed from signup to usersTbl !!!
             $sqlQuery = "INSERT  INTO  usersTbl(userName, userEmail, userPaswd, reuserPaswd) VALUES(?, ?, ?, ?)";
             $stmt = mysqli_prepare($conn, $sqlQuery);
@@ -106,15 +105,14 @@ function handleSignup()
 
                 //! need to make a alert latter !
 
-                redirectFunc('login_form.php');
-                $_SESSION['accExist'] = true;
+                alertFunc('Account Created Successfully✅', 'login_form.php');
+
                 // exit;
             }
         }
     } else {
-        redirectFunc('signup.php');
-        $_SESSION['status'] = 'paswdExist';
-        $_SESSION['paswdExist'] = true;
+        alertFunc('Password Doesnn\'t Match ❌', 'signup.php');
+
 
     }
 }
@@ -143,19 +141,11 @@ function handleResponses()
     global $conn, $name, $design, $arrTime, $deptTime, $place, $purpose, $uploadedFile;
 
 
-        $sqlQuery = "SELECT * FROM vehicle_logs(name, designation, arrTime, deptTime, place, purpose, fileName, fileType, fileData) VALUES(?, ?, ?, ?, ?, ? ,?, ?, ?)";
-        $res = mysqli_prepare($conn, $sqlQuery);
-        // if (!$stmt) {
-        //     die("Sorry Preparation Failed" . mysqli_error($conn));
-        // } else {
-        //     $stmt->bind_param('sssssssss', $name, $design, $arrTime, $deptTime, $place, $purpose, $origFilename, $mime, $finalPath);
-        //     $stmt->execute();
-        //     $stmt->close();
-        //     // echo '<script>alert("✅ File uploaded and saved (ID ' . mysqli_insert_id($conn) . ').")</script>';
-        //     $_SESSION['status'] = 'respond';
-        // }
+    $sqlQuery = "SELECT * FROM vehicle_logs(name, designation, arrTime, deptTime, place, purpose, fileName, fileType, fileData) VALUES(?, ?, ?, ?, ?, ? ,?, ?, ?)";
+    $res = mysqli_prepare($conn, $sqlQuery);
 
-    }
+
+}
 
 
 
@@ -173,7 +163,7 @@ function handleVehicleregister()
     if (isset($regBtn)) {
 
         if (empty($name) || empty($design) || empty($arrTime) || empty($deptTime) || empty($place) || empty($purpose) || empty($_FILES)) {
-            echo ('<script>alert("Invalid Input Check All The Values")</script>');
+            alertFunc("Invalid Input Check All The Values ❌", 'vehicleRegister.php');
         }
 
         // if ($name === '' || !isset($_FILES['image'])) {
@@ -209,9 +199,9 @@ function handleVehicleregister()
             $stmt->bind_param('sssssssss', $name, $design, $arrTime, $deptTime, $place, $purpose, $origFilename, $mime, $finalPath);
             $stmt->execute();
             $stmt->close();
-            // echo '<script>alert("✅ File uploaded and saved (ID ' . mysqli_insert_id($conn) . ').")</script>';
-            $_SESSION['status'] = 'dataStored';
-            redirectFunc('vehicleRegister.php');
+
+            alertFunc('Data Stored Successfully✅', 'vehicleRegister.php');
+            // echo '<script>alert(" File uploaded and saved (ID ' . mysqli_insert_id($conn) . ').")</script>';
         }
 
     } else {
@@ -234,75 +224,62 @@ function handlelogin()
     mysqli_stmt_bind_result($stmt, $foundAdname, $foundAdemail, $foundAdpasswd);
     mysqli_stmt_fetch($stmt);
     $stmt->close();
-    echo $foundAdemail . ' ' . $foundAdname . ' ' . $foundAdpasswd . ' ';
 
-    if ($foundAdname === $uname_or_email && $foundAdpasswd === $loginpaswd) {
-        redirectFunc('responses.php');
-        exit;
+
+    if ($foundAdname === $uname_or_email || $foundAdemail === $uname_or_email) {
+        if ($foundAdpasswd === $loginpaswd) {
+            redirectFunc('responses.php');
+            exit;
+        } else {
+            alertFunc('Password Incorrect Check Again! ❌', 'login_form.php');
+        }
     } elseif (paswd_verify($loginpaswd, $loginpaswd, 'login')) {
 
         //? If the user is not admin then check in usersTbl
 
-        $sqlQuery = "SELECT userName, userEmail, userPaswd FROM usersTbl where userEmail = ? OR userName = ?";
+        $sqlQuery = "SELECT userId, userName, userEmail, userPaswd FROM usersTbl where userEmail = ? OR userName = ?";
         $stmt = mysqli_prepare($conn, $sqlQuery);
         $stmt->bind_param('ss', $uname_or_email, $uname_or_email);
         $stmt->execute();
-        mysqli_stmt_bind_result($stmt, $founduname, $founduemail, $foundupasswd);
+        mysqli_stmt_bind_result($stmt, $userid, $founduname, $founduemail, $foundupasswd);
         mysqli_stmt_fetch($stmt);
         $stmt->close();
         if ($founduname === $uname_or_email || $founduemail === $uname_or_email) {
             if ($foundupasswd === $loginpaswd) {
-                redirectFunc('vehicleRegister.php');
+                // redirectFunc('vehicleRegister.php');
+                alertFunc("Logged In Successfully✅", 'vehicleRegister.php');
+                $_SESSION['user_id'] = $userid;
                 exit;
             } else {
-                echo '<script>alert("User Name | Password Incorrect Check Again!")</script>';
-                exit;
+                echo
+                    alertFunc('Password Incorrect Check Again! ❌', 'login_form.php');            // 
+                // $_SESSION['wrgpaswd']="Password Incorrect Check Again!";
+                // redirectFunc('login_form.php');
+                // exit;
+
+
             }
+        } else {
+            alertFunc("Sorry No Username Or Email Exist ❌, Create Create New Account ✅", 'login_form.php');
         }
-
-
-    } else {
     }
-
-
 }
+
+
 function redirectFunc($url)
 {
     header("Location:" . $url);
 }
 
+function alertFunc($msg, $url)
+{
+    $msg = addslashes($msg);
+
+    echo "<script>
+            alert('$msg');
+            window.location.href = '$url';
+            </script>";
+}
 
 
 
-
-
-// function selectQuery($wherecon, ):{
-
-// }
-
-// $sqlQuery = 'INSERT INTO signUp(username, email)';
-// $query_run = mysqli_query($conn, $sqlQuery);
-
-
-
-// //! Inserting values
-// $sql = "INSERT INTO loginTbl(username,paswd) values(?,?)";
-// $stmt = mysqli_prepare($conn, $sql);
-// $stmt->bind_param("ss", $uname, $upaswd);
-// $stmt->execute();
-// $stmt->close();
-// $conn->close();
-
-
-
-
-// 
-
-
-// // server.php
-// // if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-//     $action   = $_POST['action']      ?? '';
-//     $respBtn  = $_POST['responsebtn'] ?? '';
-
-/* …all your other insert/login branches… */
-// 
