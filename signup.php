@@ -65,9 +65,9 @@ requireStatus();
 
         .banner {
             background-color: #000278;
-            padding: 15px;
+            padding: 20px;
             text-align: center;
-            font-size: 20px;
+            font-size: 30px;
             color: #333;
             display: block;
             width: 100%;
@@ -137,7 +137,7 @@ requireStatus();
         form {
             background: white;
             border-radius: 20px;
-            padding: 40px 40px;
+            padding: 20px 40px;
             /* text-align: center; */
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             max-width: 500px;
@@ -225,6 +225,13 @@ requireStatus();
 
 
         }
+         .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+        }
     </style>
 
 
@@ -307,5 +314,8 @@ requireStatus();
 
    
 </body>
-
+ <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; <?php echo date('Y'); ?> NITTTR. All rights reserved. | Unauthorized access is prohibited.</p>
+    </footer>
 </html>
