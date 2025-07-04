@@ -1,6 +1,8 @@
 <?php
 require_once 'auth.php';
-requireStatus(); ?>
+requireLogin();
+// $wrgpaswd = $_SESSION['status'] ?? '';
+// unset($_SESSION['wrgpaswd']); ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +14,6 @@ requireStatus(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
     <style>
         * {
             margin: 0;
@@ -143,8 +144,8 @@ requireStatus(); ?>
 
         form {
             background: white;
-            border-radius: 20px;
-            padding: 30px 30px;
+            border-radius: 30px;
+            padding: 0 20px;
             /* text-aign: center; */
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             max-width: 600px;
@@ -197,7 +198,7 @@ requireStatus(); ?>
         }
 
         #cancel-btn {
-            background-color: rgb(230, 23, 23);
+            background-color: rgb(255, 166, 0);
             color: white;
             padding: 10px 20px;
             border: none;
@@ -227,6 +228,26 @@ requireStatus(); ?>
             margin-left: 2%;
         }
 
+        #logout-btn {
+            /* keep your visual styles */
+            background-color: rgb(240, 0, 0);
+            color: #fff;
+            padding: 12px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            bottom: 15%;
+            right: -2%;
+
+        }
+
+
+        #logout-btn:hover {
+            color: white;
+            background-color: rgb(1, 138, 13);
+        }
+
         #cancel-btn:hover {
             color: white;
             background-color: rgb(218, 0, 0);
@@ -252,6 +273,14 @@ requireStatus(); ?>
             }
 
 
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
         }
     </style>
 
@@ -279,13 +308,13 @@ requireStatus(); ?>
                 <img id="logo" src="./images/nitttrlogo.png" alt="nitttr img" class="rounded-circle"
                     style="width:128px;height:128px ">
             </div>
-            <h3>Vehicle Management</h3>
+            <h3 style=" color:#0a3d62;">Vehicle Management</h3>
             <div class="container pt-3 my-5">
                 <input type="hidden" name="action" value="vehicleRegister">
                 <label for="name">Name:</label>
 
                 <input class="form-control" type="text" id="name" name="name">
-                <br>
+
 
                 <label for="designation">Designation:</label>
 
@@ -295,7 +324,7 @@ requireStatus(); ?>
                     <label for="time">Arrived At:</label>
                     <input class="form-control" type="time" id="arrtime" name="arrtime">
 
-                    <br>
+
 
                     <label for="time">Departured At:</label>
                     <input class="form-control" type="time" id="depttime" name="depttime">
@@ -304,7 +333,7 @@ requireStatus(); ?>
                 <label for="place">Place/Area:</label>
 
                 <input class="form-control" type="text" id="place" name="place">
-                <br>
+
                 <label for="purps">Purpose:</label>
 
                 <input class="form-control" type="text" id="purps" name="purps">
@@ -315,29 +344,27 @@ requireStatus(); ?>
 
                 <br><br>
                 <br>
-                <div class="btns"><button type="submit" id="std-submit" name="storeData" value="store-data">Register</button>
-                <a id="response-btn" href="noaccess.php" style="color:white">View Responses</a></button>
-                <button class="cancel" type="reset" id="cancel-btn">Clear</button></div>
-            </div>
+                <div class="btns"><button type="submit" id="std-submit" name="storeData"
+                        value="store-data">Register</button>
+                    <a id="response-btn" href="noaccess.php" style="color:white">View Responses</a></button>
+                    <button class="cancel" type="reset" id="cancel-btn">Clear</button>
+                    <a id="logout-btn" onclick="logout()" href="login_form.php" style="color:white">logout</a>
+                </div>
+                      </div>
+          
 
         </form>
     </div>
-
-    <div>
-        <?php 
-        if ($_SESSION['status'] === 'dataStored'){
-            echo $_SESSION['status'];
-            print_r('
-            <script>alert("✅ File uploaded and saved (ID ' . mysqli_insert_id($conn) . ').")</script>
-            ');
+    <script>
+        function logout() {
+            alert("Logged out Successfully✅", 'vehicleRegister.php');
         }
-        ?>
-    </div>
-    
+    </script>
+
 </body>
-<footer>
-
-
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; <?php echo date('Y'); ?> NITTTR. All rights reserved. | Unauthorized access is prohibited.</p>
 </footer>
 
 </html>
