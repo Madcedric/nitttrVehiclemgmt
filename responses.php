@@ -1,294 +1,492 @@
 <?php include('server.php');
 require_once('auth.php');     // <-- use requireLogin() / requireAdmin() as needed
 // requireAdmin();
+// <?php
+// session_start();          // again, before HTML
+$gotRejected = $_SESSION['rejected'] ?? '';
+$gotApproved = $_SESSION['approved'] ?? '';
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$res = mysqli_query($conn,
+$res = mysqli_query(
+    $conn,
     "SELECT vRegid, name, designation, arrTime, deptTime,
             place, purpose, fileName, fileType, fileData
-     FROM   vehicle_logs
-     ORDER BY created_at DESC");
+     FROM   vehicle_logs WHERE resp_status = 'pending'
+     ORDER BY created_at DESC"
+);
+
+$statusMsg = 'Successfully✅ ';
+
 
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
-  <meta charset="utf-8">
-  <title>Vehicle Responses</title>
-  <style>
-<!-- Place this inside <head> … </head> -->
-/* — RESET ---------------------------------------------------------*/
-*
-*::before,
-*::after { box-sizing: border-box; }
-
-
-        .header-text {
-            flex: 1;
+    <meta charset="utf-8">
+    <title>Vehicle Responses</title>
+    <style>
+        <!-- Place this inside <head> … </head> 
+        -->
+        /* — RESET ---------------------------------------------------------*/
+        *
+        *::before,
+        *::after
+        {
+        box-sizing:
+        border-box;
         }
-
-        .header-text h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            font-weight: 700;
+        .header-text
+        {
+        flex:
+        1;
         }
-
-        .header-text p {
-            font-size: 16px;
-            opacity: 0.9;
-            font-weight: 300;
+        .header-text
+        h1
+        {
+        font-size:
+        28px;
+        margin-bottom:
+        8px;
+        font-weight:
+        700;
         }
-
-        .header-banner {
-            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 10px 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .header-text
+        p
+        {
+        font-size:
+        16px;
+        opacity:
+        0.9;
+        font-weight:
+        300;
         }
-
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
+        .header-banner
+        {
+        background:
+        linear-gradient(90deg,
+        #1e3c72
+        0%,
+        #2a5298
+        100%);
+        color:
+        white;
+        padding:
+        10px
+        0;
+        box-shadow:
+        0
+        4px
+        12px
+        rgba(0,
+        0,
+        0,
+        0.15);
         }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        .header-content
+        {
+        max-width:
+        1200px;
+        margin:
+        0
+        auto;
+        display:
+        flex;
+        align-items:
+        center;
+        padding:
+        0
+        20px;
         }
-
-        #viewImg {
-            background-color: rgb(4, 75, 155);
-            color: white;
-            padding: 5px 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            align-items: center;
-            margin-left: 2%;
+        .logo-container
+        {
+        display:
+        flex;
+        align-items:
+        center;
+        gap:
+        20px;
         }
-        .banner {
-            background-color: #000278;
-            padding: 15px;
-            text-align: center;
-            font-size: 20px;
-            color: #333;
-            display: block;
-            width: 100%;
-            height: auto;
-            display: flex;
-            justify-content: center;
-            /* horizontal centring  */
-            align-items: center;
+        #viewImg
+        {
+        background-color:
+        rgb(4,
+        75,
+        155);
+        color:
+        white;
+        padding:
+        5px
+        5px;
+        border:
+        none;
+        border-radius:
+        4px;
+        cursor:
+        pointer;
+        align-items:
+        center;
+        margin-left:
+        2%;
         }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+        .banner
+        {
+        background-color:
+        #000278;
+        padding:
+        15px;
+        text-align:
+        center;
+        font-size:
+        20px;
+        color:
+        #333;
+        display:
+        block;
+        width:
+        100%;
+        height:
+        auto;
+        display:
+        flex;
+        justify-content:
+        center;
+        /*
+        horizontal
+        centring
+        */
+        align-items:
+        center;
         }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+        .logo-container
+        {
+        display:
+        flex;
+        align-items:
+        center;
+        gap:
+        20px;
         }
-
-        .logo img {
-            width: 110px;
-            padding: 2px;
-            margin-right: 3px;
-            height: 110px;
-            object-position: 0.01px 2px;
-            object-fit: contain;
+        .logo
+        {
+        width:
+        80px;
+        height:
+        80px;
+        background:
+        white;
+        border-radius:
+        50%;
+        display:
+        flex;
+        align-items:
+        center;
+        justify-content:
+        center;
+        box-shadow:
+        0
+        4px
+        8px
+        rgba(0,
+        0,
+        0,
+        0.1);
+        overflow:
+        hidden;
         }
-
-        form {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 40px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            margin: 0 auto;
-            width: 400px;
-            /* background-color:rgb(187, 233, 241); */
-
+        .logo
+        img
+        {
+        width:
+        110px;
+        padding:
+        2px;
+        margin-right:
+        3px;
+        height:
+        110px;
+        object-position:
+        0.01px
+        2px;
+        object-fit:
+        contain;
         }
-
-        a {
-            text-decoration: none;
+        form
+        {
+        background:
+        white;
+        border-radius:
+        20px;
+        padding:
+        40px
+        40px;
+        text-align:
+        center;
+        box-shadow:
+        0
+        20px
+        40px
+        rgba(0,
+        0,
+        0,
+        0.1);
+        max-width:
+        500px;
+        width:
+        100%;
+        position:
+        relative;
+        overflow:
+        hidden;
+        margin:
+        0
+        auto;
+        width:
+        400px;
+        /*
+        background-color:rgb(187,
+        233,
+        241);
+        */
         }
-
-        @media (max-width: 600px) {
-
-            .banner,
-            .banner img {
-                min-height: 180px;
-                /* shorter banner on small screens */
-            }
+        a
+        {
+        text-decoration:
+        none;
         }
-
-        #cancel-btn {
-            background-color: rgb(230, 23, 23);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-left: 48%;
-            text-decoration: 0;
+        @media
+        (max-width:
+        600px)
+        {
+        .banner,
+        .banner
+        img
+        {
+        min-height:
+        180px;
+        /*
+        shorter
+        banner
+        on
+        small
+        screens
+        */
         }
-        #submit-btn{
-             background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
         }
-
-        /* Image */
-        .banner img {
-            width: auto;
-            /* fills the full width                      */
-            height: 150px;
-
-            /* banner height – adjust or use 40vh        */
-            display: block;
-            /* kills the tiny inline-gap under <img>     */
-            object-fit: cover;
-            /* scales to fill, cropping if needed        */
-            object-position: center;
-            /* keeps the focal point centred          */
+        #cancel-btn
+        {
+        background-color:
+        rgb(230,
+        23,
+        23);
+        color:
+        white;
+        padding:
+        10px
+        20px;
+        border:
+        none;
+        border-radius:
+        4px;
+        cursor:
+        pointer;
+        margin-left:
+        48%;
+        text-decoration:
+        0;
         }
-
-
-        .footer {
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
+        #rejectBtn
+        {
+        background-color:
+        rgb(230,
+        23,
+        23);
+        color:
+        white;
+        padding:
+        10px
+        20px;
+        border:
+        none;
+        border-radius:
+        4px;
+        cursor:
+        pointer;
+        margin-left:
+        48%;
+        text-decoration:
+        0;
         }
-/* — LAYOUT --------------------------------------------------------*/
-        body{
-            margin:0;
-            font: 15px/1.5 "Segoe UI", Roboto, sans-serif;
-            background:#f6f8fb;
-            color:#333;
+        #approveBtn
+        {
+        background-color:
+        #4CAF50;
+        color:
+        white;
+        padding:
+        10px
+        20px;
+        border:
+        none;
+        border-radius:
+        4px;
+        cursor:
+        pointer;
         }
+        /*
+        Image
+        */
+        .banner
+        img
+        {
+        width:
+        auto;
+        /*
+        fills
+        the
+        full
+        width
+        */
+        height:
+        150px;
+        /*
+        banner
+        height
+        –
+        adjust
+        or
+        use
+        40vh
+        */
+        display:
+        block;
+        /*
+        kills
+        the
+        tiny
+        inline-gap
+        under
+    <img> */
+    object-fit: cover;
+    /* scales to fill, cropping if needed */
+    object-position: center;
+    /* keeps the focal point centred */
+    }
 
-        form {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 80px;
-            /* text-align: center; */
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 900px;
-            width: 1000px;
-            position: relative;
-            overflow: hidden;
-            margin: 0 auto;
-            width: 900px;;
-            /* background-color:rgb(187, 233, 241); */
 
-        }
+    .footer {
+    background: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 14px;
+    }
+    /* — LAYOUT --------------------------------------------------------*/
+    body{
+    margin:0;
+    font: 15px/1.5 "Segoe UI", Roboto, sans-serif;
+    background:#f6f8fb;
+    color:#333;
+    }
+
+    form {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 80px;
+    /* text-align: center; */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    width: 1000px;
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    width: 900px;;
+    /* background-color:rgb(187, 233, 241); */
+
+    }
 
     h2{
-        margin: 1rem 0;
-        text-align:center;
-        color:#0a3d62;
+    margin: 1rem 0;
+    text-align:center;
+    color:#0a3d62;
     }
 
     .table-wrapper{
-        max-width: 96%;
-        margin:0 auto 2rem;
-        overflow-x: auto;
-        background:#fff;
-        border-radius:10px;
-        box-shadow:0 4px 14px rgba(0,0,0,.08);
-}
+    max-width: 96%;
+    margin:0 auto 2rem;
+    overflow-x: auto;
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 4px 14px rgba(0,0,0,.08);
+    }
 
     table{
-        width:100%;
-        border-collapse:collapse;
-        min-width:800px;
-}
+    width:100%;
+    border-collapse:collapse;
+    min-width:800px;
+    }
 
-/* — HEADER -------------------------------------------------------*/
+    /* — HEADER -------------------------------------------------------*/
     thead{
-        background:#0a3d62;
-        color:#fff;
-}
+    background:#0a3d62;
+    color:#fff;
+    }
 
     th,td{
-        padding:.75rem 1rem;
-        text-align:left;
-}
+    padding:.75rem 1rem;
+    text-align:left;
+    }
 
 
     th{ font-weight:600; }
 
-/* — ZEBRA + HOVER ------------------------------------------------*/
+    /* — ZEBRA + HOVER ------------------------------------------------*/
     tbody tr:nth-child(even){ background:#f3f6fa; }
 
     tbody tr:hover{
-        background:#dde8fb;
-        transition:.2s;
-}
+    background:#dde8fb;
+    transition:.2s;
+    }
 
-/* — THUMBNAILS / LINKS ------------------------------------------*/
+    /* — THUMBNAILS / LINKS ------------------------------------------*/
     .thumb{
-        width:80px; height:80px;
-        object-fit:cover;
-        border-radius:6px;
-        box-shadow:0 0 0 1px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.12);
-        transition:.2s;
-}
+    width:80px; height:80px;
+    object-fit:cover;
+    border-radius:6px;
+    box-shadow:0 0 0 1px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.12);
+    transition:.2s;
+    }
     .thumb:hover{ transform:scale(1.05); }
 
-/* non‑image link style */
+    /* non‑image link style */
     .file-link{
-        display:inline-block;
-        padding:.25rem .5rem;
-        border-radius:5px;
-        background:#e1ecf4;
-        color:#084b8a;
-        text-decoration:none;
-        font-size:.9rem;
-}   
+    display:inline-block;
+    padding:.25rem .5rem;
+    border-radius:5px;
+    background:#e1ecf4;
+    color:#084b8a;
+    text-decoration:none;
+    font-size:.9rem;
+    }
     .file-link:hover{ background:#d4e4f2; }
 
-/* — CHIPS FOR TIMES --------------------------------------------*/
+    /* — CHIPS FOR TIMES --------------------------------------------*/
 
 
     @media (max-width:600px){
-        h2{ font-size:1.2rem; }
-}
+    h2{ font-size:1.2rem; }
+    }
 
-        table   { border-collapse:collapse; width:100%; font-family:Arial, sans-serif; }
-        th, td  { border:1px solid #ccc; padding:.5rem; }
-        .thumb  { max-width:90px; max-height:90px; object-fit:cover; }
-  </style>
+    table { border-collapse:collapse; width:100%; font-family:Arial, sans-serif; }
+    th, td { border:1px solid #ccc; padding:.5rem; }
+    .thumb { max-width:90px; max-height:90px; object-fit:cover; }
+    </style>
 </head>
 
 <body>
 
-    <!-- Header Banner -->
+    <!-- Header    Banner -->
     <header class="header-banner">
         <div class="header-content">
             <div class="logo-container">
@@ -303,8 +501,16 @@ $res = mysqli_query($conn,
         </div>
     </header>
 
-    <form action="">
+    <form method="post">
+        <input type="hidden" name="action" value="responses" id="">
+        <!-- <?php echo $echotemp; ?> -->
         <h2>Vehicle Log Responses</h2>
+  
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>$msg . $statusMsg;
+                </div>
+
+
         <table>
             <tr>
                 <th>#sno</th>
@@ -330,10 +536,10 @@ $res = mysqli_query($conn,
                         <td>
                             <?php if ($row['fileName']): ?>
                                 <?php
-                                    $id = $row['fileData'];
-                                    $img = "show_file.php?vRegid=$id";
-                                    $originPath = $row["fileData"];
-                                    $imgfile = substr($originPath, 33, );
+                                $id = $row['fileData'];
+                                $img = "show_file.php?vRegid=$id";
+                                $originPath = $row["fileData"];
+                                $imgfile = substr($originPath, 33, );
                                 ?>
                                 <?php if (str_starts_with($row['fileType'], 'image/')): ?>
                                     <img class="thumb" src="<?= $imgfile ?>" alt="<?= htmlspecialchars($row['fileName']) ?>">
@@ -341,8 +547,11 @@ $res = mysqli_query($conn,
                                     <h4><?= htmlspecialchars($row['fileName']) ?></h5>
 
                                         <a id="viewImg" href='<?= $imgfile ?>'>View Image</a>
-                                        <button id='submit-btn'>aprove</button>
-                                        <button id="cancel-btn">Reject</button>
+                                        <button onclick="choice()" type="submit" name="approve" value="<?= $row['vRegid'] ?>"
+                                            id='approveBtn'>Approve</button>
+                                        <?php ?>
+                                        <button onclick="choice()" name="reject" type="submit" value="<?= $row['vRegid'] ?>"
+                                            id="rejectBtn">Reject</button>
                                     <?php else: ?>
                                         <a href="<?= $img ?>" target="_blank">
                                             <?= htmlspecialchars($row['fileName']) ?>
@@ -356,6 +565,28 @@ $res = mysqli_query($conn,
         </table>
     </form>
 </body>
+<script>
+    function choice() {
+
+        choiceReject = document.getElementById('rejectBtn');
+        if (choiceReject) {
+
+            confirm("Are you sure want to Reject");
+            "<?php userStatus(('Rejected'))?>"
+        }
+
+        choiceApprove = document.getElementById('apporoveBtn');
+
+        if (choiceApprove) {
+
+            confirm("Are you sure want to approve");
+            "<?php userStatus(('approved'))?>"
+
+        }
+
+
+    }
+</script>
 
 <!-- Footer -->
 <footer class="footer">
