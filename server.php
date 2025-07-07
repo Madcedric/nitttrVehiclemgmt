@@ -32,11 +32,12 @@ $purpose = $_POST['purps'] ?? '';
 $uploadedFile = $_POST['file'] ?? '';
 $uname_or_email = trim($_POST['user_name_or_paswd'] ?? '');
 $loginpaswd = trim($_POST['user-paswd'] ?? '');
-
 //! check if the var are comming
 // echo var_dump($uname_or_email);
 // echo var_dump($loginpaswd);
 
+$approved = $_POST['approve'] ?? '';
+$rejected = $_POST['reject'] ?? '';
 
 //? Signup form
 $uname = trim($_POST['newUser-name'] ?? '');
@@ -59,7 +60,7 @@ switch ($action) {
     case 'vehicleRegister':
         handleVehicleregister();
         break;
-    case 'reponses':
+    case 'responses':
         handleResponses();
         break;
 
@@ -138,24 +139,64 @@ function paswd_verify($paswd1, $paswd2, $session)
 function handleResponses()
 {
 
-    global $conn, $name, $design, $arrTime, $deptTime, $place, $purpose, $uploadedFile;
 
 
-    $sqlQuery = "SELECT * FROM vehicle_logs(name, designation, arrTime, deptTime, place, purpose, fileName, fileType, fileData) VALUES(?, ?, ?, ?, ?, ? ,?, ?, ?)";
-    $res = mysqli_prepare($conn, $sqlQuery);
+    global $conn, $approved, $rejected;
+
+
+    $sqlQuery = "SELECT vRegid FROM vehicle_logs ";
+    $res = mysqli_query($conn, $sqlQuery);
+    $row = mysqli_fetch_assoc($res);
+
+    // handleStatus($row);
+
+    if (($approved || $rejected)) {
+        // function handleStatus($row)
+        // {
+
+        global $conn, $approved, $rejected;
+
+        if ($rejected) {
+
+            $rejectId = (int) $rejected;
+
+            $querryReject = "UPDATE vehicle_logs SET resp_status = 'rejected' WHERE vRegid = ?";
+            $stmt = mysqli_prepare($conn, $querryReject);
+            $stmt->bind_param("i", $rejectId);
+            $stmt->execute();
+            $stmt->close();
+            $_SESSION['rejected'] = true;
+        }
+
+        if ($approved) {
+
+            $aproveId = (int) $approved;
+
+
+
+            $querryAprove = "UPDATE vehicle_logs SET resp_status = 'approved' WHERE vRegid = ?";
+            $stmt = mysqli_prepare($conn, $querryAprove);
+            $stmt->bind_param("i", $aproveId);
+            $stmt->execute();
+            $stmt->close();
+            $_SESSION['approved'] = true;
+
+        }
+
+        // }
+    }
 
 
 }
 
 
-
-
+// var_dump($regBtn);
 function handleVehicleregister()
 {
 
     global $conn, $regBtn, $name, $design, $arrTime, $deptTime, $place, $purpose, $uploadedFile;
     //     echo '<pre>';
-// var_dump($_POST);   // everything from the form
+    // everything from the form
 // var_dump($);  // the file‑upload info
 // echo '</pre>';
 // exit;
@@ -280,6 +321,3 @@ function alertFunc($msg, $url)
             window.location.href = '$url';
             </script>";
 }
-
-
-
