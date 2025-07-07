@@ -1,4 +1,5 @@
 <?php
+include_once("server.php");
 require_once 'auth.php';
 requireLogin();
 // $wrgpaswd = $_SESSION['status'] ?? '';
@@ -205,7 +206,7 @@ requireLogin();
             /* position: block; */
             border-radius: 4px;
             cursor: pointer;
-            margin-left: 2%;
+            margin-left: 1%;
             text-decoration: 0;
         }
 
@@ -221,11 +222,11 @@ requireLogin();
         #response-btn {
             background-color: rgb(4, 75, 155);
             color: white;
-            padding: 10px 10px;
+            padding: 10px 5px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            margin-left: 2%;
+            margin-left: 1%;
         }
 
         #logout-btn {
@@ -346,9 +347,10 @@ requireLogin();
                 <br>
                 <div class="btns"><button type="submit" id="std-submit" name="storeData"
                         value="store-data">Register</button>
-                    <a id="response-btn" href="noaccess.php" style="color:white">View Responses</a></button>
+                    <a id="response-btn" href="noaccess.php" style="color:white">Responses</a></button>
+                    <a id="response-btn" href="status.php" style="color:white">Status</a></button>
                     <button class="cancel" type="reset" id="cancel-btn">Clear</button>
-                    <a id="logout-btn" onclick="logout()" href="login_form.php" style="color:white">logout</a>
+                    <a id="logout-btn" onclick="logout()" href="login_form.php" style="color:white">Logout</a>
                 </div>
                       </div>
           
