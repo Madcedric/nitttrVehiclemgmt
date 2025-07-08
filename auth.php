@@ -13,8 +13,8 @@ function requireLogin(): void
 
 function requireAdmin(): void
 {
-    requireLogin();
-    if (($_SESSION['role'] ?? '') !== 'admin') {
+    // requireLogin();
+    if (($_SESSION['adminId'] ?? '') !== 1) {
         header('Location: no_access.php');
         exit;
     }
