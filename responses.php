@@ -1,10 +1,21 @@
 <?php include('server.php');
 require_once('auth.php');     // <-- use requireLogin() / requireAdmin() as needed
-// requireAdmin();
-// <?php
-// session_start();          // again, before HTML
-$gotRejected = $_SESSION['rejected'] ?? '';
-$gotApproved = $_SESSION['approved'] ?? '';
+requireAdmin();
+// always first
+
+$statusMsg = '';                    // default
+if (isset($_SESSION['userStatus'])) {
+    $choice = $_SESSION['userStatus'];   // grab it once
+    unset($_SESSION['userStatus']);      // ⚠ delete so it won’t linger
+
+    if ($choice === 'rejected') {
+        $statusMsg = "<div class='alert alert-success'><i class='fas fa-check-circle'></i>" . 'Rejected Successfully ';
+
+    } elseif ($choice === 'approved') {
+        $statusMsg = "<div class='alert alert-success'><i class='fas fa-check-circle'></i>" . 'Approved Succssfully ';
+    }
+}
+
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
@@ -16,7 +27,8 @@ $res = mysqli_query(
      ORDER BY created_at DESC"
 );
 
-$statusMsg = 'Successfully✅ ';
+
+
 
 
 ?>
@@ -114,21 +126,16 @@ $statusMsg = 'Successfully✅ ';
         rgb(4,
         75,
         155);
-        color:
-        white;
+        color:white;
         padding:
-        5px
+        10px
         5px;
         border:
         none;
-        border-radius:
-        4px;
-        cursor:
-        pointer;
-        align-items:
-        center;
-        margin-left:
-        2%;
+        border-radius:4px;
+        cursor:pointer;
+        align-items:center;
+        margin-left:5%;
         }
         .banner
         {
@@ -232,7 +239,7 @@ $statusMsg = 'Successfully✅ ';
         0,
         0.1);
         max-width:
-        500px;
+        900px;
         width:
         100%;
         position:
@@ -273,6 +280,12 @@ $statusMsg = 'Successfully✅ ';
         screens
         */
         }
+        }
+        #msg
+        {
+        color:
+        #000278;
+        ;
         }
         #cancel-btn
         {
@@ -342,146 +355,289 @@ $statusMsg = 'Successfully✅ ';
         {
         width:
         auto;
-        /*
-        fills
-        the
-        full
-        width
-        */
         height:
         150px;
-        /*
-        banner
-        height
-        –
-        adjust
-        or
-        use
-        40vh
-        */
         display:
         block;
+        object-fit:
+        cover;
+        object-position:
+        center;
+        }
+        .footer
+        {
+        background:
+        #2c3e50;
+        color:
+        white;
+        text-align:
+        center;
+        padding:
+        20px;
+        font-size:
+        14px;
+        }
+        /* — LAYOUT --------------------------------------------------------*/
+        body
+        {
+        margin:0;
+        font:
+        15px/1.5
+        "Segoe
+        UI",
+        Roboto,
+        sans-serif;
+        background:#f6f8fb;
+        color:#333;
+        }
+        form
+        {
+        background:
+        white;
+        border-radius:
+        20px;
+        padding:
+        40px
+        80px;
         /*
-        kills
-        the
-        tiny
-        inline-gap
-        under
-    <img> */
-    object-fit: cover;
-    /* scales to fill, cropping if needed */
-    object-position: center;
-    /* keeps the focal point centred */
-    }
-
-
-    .footer {
-    background: #2c3e50;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    font-size: 14px;
-    }
-    /* — LAYOUT --------------------------------------------------------*/
-    body{
-    margin:0;
-    font: 15px/1.5 "Segoe UI", Roboto, sans-serif;
-    background:#f6f8fb;
-    color:#333;
-    }
-
-    form {
-    background: white;
-    border-radius: 20px;
-    padding: 40px 80px;
-    /* text-align: center; */
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    max-width: 900px;
-    width: 1000px;
-    position: relative;
-    overflow: hidden;
-    margin: 0 auto;
-    width: 900px;;
-    /* background-color:rgb(187, 233, 241); */
-
-    }
-
-    h2{
-    margin: 1rem 0;
-    text-align:center;
-    color:#0a3d62;
-    }
-
-    .table-wrapper{
-    max-width: 96%;
-    margin:0 auto 2rem;
-    overflow-x: auto;
-    background:#fff;
-    border-radius:10px;
-    box-shadow:0 4px 14px rgba(0,0,0,.08);
-    }
-
-    table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:800px;
-    }
-
-    /* — HEADER -------------------------------------------------------*/
-    thead{
-    background:#0a3d62;
-    color:#fff;
-    }
-
-    th,td{
-    padding:.75rem 1rem;
-    text-align:left;
-    }
-
-
-    th{ font-weight:600; }
-
-    /* — ZEBRA + HOVER ------------------------------------------------*/
-    tbody tr:nth-child(even){ background:#f3f6fa; }
-
-    tbody tr:hover{
-    background:#dde8fb;
-    transition:.2s;
-    }
-
-    /* — THUMBNAILS / LINKS ------------------------------------------*/
-    .thumb{
-    width:80px; height:80px;
-    object-fit:cover;
-    border-radius:6px;
-    box-shadow:0 0 0 1px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.12);
-    transition:.2s;
-    }
-    .thumb:hover{ transform:scale(1.05); }
-
-    /* non‑image link style */
-    .file-link{
-    display:inline-block;
-    padding:.25rem .5rem;
-    border-radius:5px;
-    background:#e1ecf4;
-    color:#084b8a;
-    text-decoration:none;
-    font-size:.9rem;
-    }
-    .file-link:hover{ background:#d4e4f2; }
-
-    /* — CHIPS FOR TIMES --------------------------------------------*/
-
-
-    @media (max-width:600px){
-    h2{ font-size:1.2rem; }
-    }
-
-    table { border-collapse:collapse; width:100%; font-family:Arial, sans-serif; }
-    th, td { border:1px solid #ccc; padding:.5rem; }
-    .thumb { max-width:90px; max-height:90px; object-fit:cover; }
+        text-align:
+        center;
+        */
+        box-shadow:
+        0
+        20px
+        40px
+        rgba(0,
+        0,
+        0,
+        0.1);
+        max-width:
+        900px;
+        width:
+        100%;
+        position:
+        relative;
+        overflow:
+        hidden;
+        margin:
+        0
+        auto;
+        width:
+        900px;
+        ;
+        /*
+        background-color:rgb(187,
+        233,
+        241);
+        */
+        }
+        .alert
+        {
+        padding:
+        15px
+        20px;
+        border-radius:
+        6px;
+        margin:
+        20px
+        auto;
+        max-width:
+        600px;
+        font-size:
+        16px;
+        display:
+        flex;
+        align-items:
+        center;
+        gap:
+        10px;
+        box-shadow:
+        0
+        3px
+        6px
+        rgba(0,
+        0,
+        0,
+        0.1);
+        }
+        .alert-success
+        {
+        background-color:
+        #d4edda;
+        color:
+        #155724;
+        border-left:
+        5px
+        solid
+        #28a745;
+        }
+        .alert
+        i
+        {
+        font-size:
+        20px;
+        color:
+        #28a745;
+        }
+        h2
+        {
+        margin:
+        1rem
+        0;
+        text-align:center;
+        color:#0a3d62;
+        }
+        .table-wrapper
+        {
+        max-width:
+        96%;
+        margin:0
+        auto
+        2rem;
+        overflow-x:
+        auto;
+        background:#fff;
+        border-radius:10px;
+        box-shadow:0
+        4px
+        14px
+        rgba(0,
+        0,
+        0,
+        .08);
+        }
+        #file {
+        width:250px;
+        /*
+        padding:20px;
+        */
+        }
+        table
+        {
+        width:100%;
+        border-collapse:collapse;
+        min-width:800px;
+        }
+        /* — HEADER -------------------------------------------------------*/
+        thead
+        {
+        background:#0a3d62;
+        color:#fff;
+        }
+        th,
+        td
+        {
+        padding:5rem
+        5rem;
+        text-align:center;
+        }
+        th
+        {
+        font-weight:600;
+        }
+        /* — ZEBRA
+        +
+        HOVER
+        ------------------------------------------------*/
+        tbody
+        tr:nth-child(even)
+        {
+        background:#f3f6fa;
+        }
+        tbody
+        tr:hover
+        {
+        background:#dde8fb;
+        transition:.2s;
+        }
+        /* — THUMBNAILS
+        /
+        LINKS
+        ------------------------------------------*/
+        .thumb
+        {
+        width:80px;
+        height:80px;
+        object-fit:cover;
+        border-radius:6px;
+        box-shadow:0
+        0
+        0
+        1px
+        rgba(0,
+        0,
+        0,
+        .1),
+        0
+        2px
+        6px
+        rgba(0,
+        0,
+        0,
+        .12);
+        transition:.2s;
+        }
+        .thumb:hover
+        {
+        transform:scale(1.05);
+        }
+        /*
+        non‑image
+        link
+        style
+        */
+        .file-link
+        {
+        display:inline-block;
+        padding:.25rem
+        .5rem;
+        border-radius:5px;
+        background:#e1ecf4;
+        color:#084b8a;
+        text-decoration:none;
+        font-size:.9rem;
+        }
+        .file-link:hover
+        {
+        background:#d4e4f2;
+        }
+        /* — CHIPS
+        FOR
+        TIMES
+        --------------------------------------------*/
+        @media
+        (max-width:600px)
+        {
+        h2
+        {
+        font-size:1.2rem;
+        }
+        }
+        table
+        {
+        border-collapse:collapse;
+        width:100%;
+        font-family:Arial,
+        sans-serif;
+        }
+        th,
+        td
+        {
+        border:1px
+        solid
+        #ccc;
+        padding:.5rem;
+        }
+        .thumb
+        {
+        max-width:90px;
+        max-height:90px;
+        object-fit:cover;
+        }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> -->
 </head>
 
 <body>
@@ -503,24 +659,37 @@ $statusMsg = 'Successfully✅ ';
 
     <form method="post">
         <input type="hidden" name="action" value="responses" id="">
-        <!-- <?php echo $echotemp; ?> -->
         <h2>Vehicle Log Responses</h2>
-  
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>$msg . $statusMsg;
-                </div>
+
+        <?php if (isset($statusMsg)): ?>
+            <div>
+                <?php echo $statusMsg; ?>
+            </div>
+
+
+
+        <?php endif; ?>
 
 
         <table>
             <tr>
-                <th>#sno</th>
+                <!-- <th>#sno</th>
                 <th>Name</th>
                 <th>Designation</th>
                 <th>Arrived</th>
                 <th>Departed</th>
                 <th>Place</th>
                 <th>Purpose</th>
-                <th>File</th>
+                <th>File</th> -->
+                <th><i class="fas fa-hashtag"></i> #ID</th>
+                <th><i class="fas fa-user"></i> Name</th>
+                <th><i class="fas fa-briefcase"></i> Designation</th>
+                <th><i class="fas fa-clock"></i> Arrival Time</th>
+                <th><i class="fas fa-clock"></i> Departure Time</th>
+                <th><i class="fas fa-map-marker-alt"></i> Place</th>
+                <th><i class="fas fa-bullseye"></i> Purpose</th>
+                <th><i id="file" class="fas fa-image"></i> File</th>
+
             </tr>
 
             <?php while ($row = mysqli_fetch_assoc($res)): ?>
@@ -547,11 +716,19 @@ $statusMsg = 'Successfully✅ ';
                                     <h4><?= htmlspecialchars($row['fileName']) ?></h5>
 
                                         <a id="viewImg" href='<?= $imgfile ?>'>View Image</a>
-                                        <button onclick="choice()" type="submit" name="approve" value="<?= $row['vRegid'] ?>"
-                                            id='approveBtn'>Approve</button>
-                                        <?php ?>
-                                        <button onclick="choice()" name="reject" type="submit" value="<?= $row['vRegid'] ?>"
-                                            id="rejectBtn">Reject</button>
+
+                                        <div id="customConfirm" class="modal">
+                                            <div class="modal-content">
+
+                                                <button onclick="choice(event)" type="submit" style="margin-left:10% " name="approve"
+                                                    value="<?= $row['vRegid'] ?>" id='approveBtn'>Approve</button>
+                                                <button onclick="choice(event)" name="reject" type="submit"
+                                                    value="<?= $row['vRegid'] ?>" id="rejectBtn"
+                                                    style="margin:10% ">Reject</button>
+                                            </div>
+                                        </div>
+
+
                                     <?php else: ?>
                                         <a href="<?= $img ?>" target="_blank">
                                             <?= htmlspecialchars($row['fileName']) ?>
@@ -564,33 +741,46 @@ $statusMsg = 'Successfully✅ ';
             <?php endwhile; ?>
         </table>
     </form>
-</body>
-<script>
-    function choice() {
 
-        choiceReject = document.getElementById('rejectBtn');
-        if (choiceReject) {
+    <script>
+        function choice(e) {
 
-            confirm("Are you sure want to Reject");
-            "<?php userStatus(('Rejected'))?>"
+            // choiceReject = document.getElementById('rejectBtn');
+            // choiceApprove = document.getElementById('approveBtn');
+
+            const btnId = e.target.id;
+
+            if (btnId === 'rejectBtn') {
+
+                if (confirm("Are you sure want to Reject")) {
+
+                } else {
+                    e.preventDefault();
+                }
+            } else if (btnId === 'approveBtn') {
+
+                if (confirm("Are you sure want to approve")) {
+
+                } else {
+                    e.preventDefault();
+                }
+
+
+            }
+
         }
 
-        choiceApprove = document.getElementById('apporoveBtn');
-
-        if (choiceApprove) {
-
-            confirm("Are you sure want to approve");
-            "<?php userStatus(('approved'))?>"
-
-        }
 
 
-    }
-</script>
 
-<!-- Footer -->
-<footer class="footer">
-    <p>&copy; <?php echo date('Y'); ?> NITTTR. All rights reserved. | Unauthorized access is prohibited.</p>
-</footer>
+
+    </script>
+
+
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; <?php echo date('Y'); ?> NITTTR. All rights reserved. | Unauthorized access is prohibited.</p>
+    </footer>
 
 </html>
