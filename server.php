@@ -29,6 +29,7 @@ $deptTime = $_POST['depttime'] ?? '';
 $place = $_POST['place'] ?? '';
 $regBtn = $_POST['storeData'] ?? '';
 $purpose = $_POST['purps'] ?? '';
+
 $uploadedFile = $_POST['file'] ?? '';
 $uname_or_email = trim($_POST['user_name_or_paswd'] ?? '');
 $loginpaswd = trim($_POST['user-paswd'] ?? '');
@@ -63,6 +64,8 @@ switch ($action) {
     case 'responses':
         handleResponses();
         break;
+    case 'status':
+        handleStatus();
 
 }
 
@@ -136,6 +139,29 @@ function paswd_verify($paswd1, $paswd2, $session)
     }
 }
 
+function handleStatus(): array
+{
+    global $conn;
+
+
+        $res = mysqli_query(
+            $conn,
+            "SELECT vRegid, name, designation, arrTime, deptTime,
+            place, purpose, resp_status, created_at
+     FROM   vehicle_logs
+    ORDER BY created_at DESC"
+        );
+        $row = mysqli_fetch_all($res, MYSQLI_ASSOC);
+        return $row;
+    }
+
+
+
+
+
+
+
+
 function handleResponses()
 {
 
@@ -144,15 +170,11 @@ function handleResponses()
     global $conn, $approved, $rejected;
 
 
-    $sqlQuery = "SELECT vRegid FROM vehicle_logs ";
-    $res = mysqli_query($conn, $sqlQuery);
-    $row = mysqli_fetch_assoc($res);
 
     // handleStatus($row);
 
     if (($approved || $rejected)) {
-        // function handleStatus($row)
-        // {
+
 
         global $conn, $approved, $rejected;
 
@@ -162,24 +184,26 @@ function handleResponses()
 
             $querryReject = "UPDATE vehicle_logs SET resp_status = 'rejected' WHERE vRegid = ?";
             $stmt = mysqli_prepare($conn, $querryReject);
+
             $stmt->bind_param("i", $rejectId);
             $stmt->execute();
             $stmt->close();
-            $_SESSION['rejected'] = true;
+            $_SESSION['userStatus'] = 'rejected';
+
         }
 
         if ($approved) {
 
-            $aproveId = (int) $approved;
+            $approveId = (int) $approved;
 
 
 
-            $querryAprove = "UPDATE vehicle_logs SET resp_status = 'approved' WHERE vRegid = ?";
-            $stmt = mysqli_prepare($conn, $querryAprove);
-            $stmt->bind_param("i", $aproveId);
+            $querryApprove = "UPDATE vehicle_logs SET resp_status = 'approved' WHERE vRegid = ?";
+            $stmt = mysqli_prepare($conn, $querryApprove);
+            $stmt->bind_param("i", $approveId);
             $stmt->execute();
             $stmt->close();
-            $_SESSION['approved'] = true;
+            $_SESSION['userStatus'] = 'approved';
 
         }
 
@@ -258,11 +282,11 @@ function handlelogin()
 {
     global $conn, $loginpaswd, $uname_or_email;
 
-    $adminsql = "SELECT adminName, adminEmail, adminPaswd FROM adminsTbl where adminEmail = ? OR adminName = ?";
+    $adminsql = "SELECT adminId, adminName, adminEmail, adminPaswd FROM adminsTbl where adminEmail = ? OR adminName = ?";
     $stmt = mysqli_prepare($conn, $adminsql);
     $stmt->bind_param('ss', $uname_or_email, $uname_or_email);
     $stmt->execute();
-    mysqli_stmt_bind_result($stmt, $foundAdname, $foundAdemail, $foundAdpasswd);
+    mysqli_stmt_bind_result($stmt, $foundAdid, $foundAdname, $foundAdemail, $foundAdpasswd);
     mysqli_stmt_fetch($stmt);
     $stmt->close();
 
@@ -270,6 +294,8 @@ function handlelogin()
     if ($foundAdname === $uname_or_email || $foundAdemail === $uname_or_email) {
         if ($foundAdpasswd === $loginpaswd) {
             redirectFunc('responses.php');
+            $_SESSION['adminId'] = $foundAdid;
+
             exit;
         } else {
             alertFunc('Password Incorrect Check Again! ❌', 'login_form.php');
